@@ -1,0 +1,22 @@
+services:
+  web:
+    build:
+      target: web
+    ports:
+    - "8000:8000"
+    environment:
+      CONNECTION_STRING: "postgresql+psycopg2://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@database/${DATABASE_USERNAME}"
+  bot:
+    build:
+      target: bot
+    environment:
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      DISCORD_GUILD_ID: ${DISCORD_GUILD_ID}
+      CONNECTION_STRING: "postgresql+psycopg2://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@database/${DATABASE_USERNAME}"
+  database:
+    hostname: "database"
+    image: "postgres:latest"
+    restart: always
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
