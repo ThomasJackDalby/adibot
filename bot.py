@@ -1,7 +1,7 @@
 import os
 import datetime
 import discord
-import data
+from data import DataBaseSession
 import utils
 import constants
 from model import Member, Session
@@ -30,67 +30,72 @@ async def get_guild() -> Optional[Guild]:
 
 @tree.command(name='add-member', description='Adds a member', guild=GUILD)
 async def add_member(interaction: discord.Interaction, user: discord.Member, name: str):
-    guild_name = await get_guild_name()
-    discord_name = user.name
-    data.add_member(name, discord_name)
-    await interaction.response.send_message(f"Added {discord_name} [{name}] to {guild_name}")
+    with DataBaseSession() as db:
+        guild_name = await get_guild_name()
+        discord_name = user.name
+        db.add_member(name, discord_name)
+        await interaction.response.send_message(f"Added {discord_name} [{name}] to {guild_name}")
 
 @tree.command(name='remove-member', description='Removes a member', guild=GUILD)
 async def add_member(interaction: discord.Interaction, user: discord.Member, name: str):
-    guild_name = await get_guild_name()
-    discord_name = user.name
-    data.add_member(name, discord_name)
-    await interaction.response.send_message(f"Removed {discord_name} [{name}] from {guild_name}")
+    with DataBaseSession() as db:
+        guild_name = await get_guild_name()
+        discord_name = user.name
+        db.add_member(name, discord_name)
+        await interaction.response.send_message(f"Removed {discord_name} [{name}] from {guild_name}")
 
-def get_or_create_session(current_datetime: datetime.datetime) -> Session:
+def get_or_create_session(db: DataBaseSession, current_datetime: datetime.datetime) -> Session:
     """gets or creates a session for this Friday"""
     current_date = current_datetime.date()
-    session = data.get_session_by_date(current_date)
-    if session is None: session = data.add_session(current_date)
+    session = db.get_session_by_date(current_date)
+    if session is None: session = db.add_session(current_date)
     return session
 
 async def on_user_joins_channel(discord_member: discord.Member) -> None:
-    guild_name = await get_guild_name()
-    print(f"{discord_member.name} is in {guild_name}")
+    with DataBaseSession() as db:
+        guild_name = await get_guild_name()
+        print(f"[{discord_member.name}] is in [{guild_name}]")
 
-    member = data.get_member_by_discord_name(discord_member.name)
-    if member is None: return
+        member = db.get_member_by_discord_name(discord_member.name)
+        if member is None: return
 
-    current_datetime = datetime.datetime.today()
-    if not utils.is_valid_session_from_datetime(current_datetime): return False
-    session = get_or_create_session(current_datetime)
+        current_datetime = datetime.datetime.today()
+        if not utils.is_valid_session_from_datetime(current_datetime): return False
+        session = get_or_create_session(db, current_datetime)
 
-    session_member = data.get_session_member(member_id=member.id, session_id=session.id)
-    if session_member is None:
-        data.add_session_member(session.id, member.id, start=current_datetime, end=current_datetime)
-    else:
-        session_member.end = current_datetime
-        data.update_session_member(session_member)  
+        session_member = db.get_session_member(member_id=member.id, session_id=session.id)
+        if session_member is None:
+            db.add_session_member(session.id, member.id, start=current_datetime, end=current_datetime)
+        else:
+            session_member.end = current_datetime
+            db.update_session_member(session_member)  
 
 async def on_user_leaves_channel(discord_member: Member) -> None:
-    member = data.get_member_by_discord_name(discord_member.name)
-    if member is None: return
+    with DataBaseSession() as db:
+        member = db.get_member_by_discord_name(discord_member.name)
+        if member is None: return
 
-    current_datetime = datetime.datetime.today()
-    if not utils.is_valid_session_from_datetime(current_datetime): return False
-    session = get_or_create_session(current_datetime)
+        current_datetime = datetime.datetime.today()
+        if not utils.is_valid_session_from_datetime(current_datetime): return False
+        session = get_or_create_session(db, current_datetime)
 
-    session_member = data.get_session_member(member_id=member.id, session_id=session.id)
-    if session_member is None: 
-        session_start_datetime = utils.get_current_or_last_session_start_date(current_datetime.date())
-        data.add_session_member(session.id, member.id, start=session_start_datetime, end=current_datetime)
-    else:
-        session_member.end = current_datetime
-        data.update_session_member(session_member)
+        print(f"{session=}")
+        session_member = db.get_session_member(member_id=member.id, session_id=session.id)
+        if session_member is None: 
+            session_start_datetime = utils.get_current_or_last_session_start_date(current_datetime.date())
+            db.add_session_member(session.id, member.id, start=session_start_datetime, end=current_datetime)
+        else:
+            session_member.end = current_datetime
+            db.update_session_member(session_member)
 
 @client.event
 async def on_ready():
     print(f'Logged on as {client.user}!')
-    try:
-        synced = await tree.sync(guild=GUILD)
-        print(f"Synced {len(synced)} command(s).")
-    except Exception as e:
-        print(e)
+    await synchronise_slash_commands()
+
+async def synchronise_slash_commands():
+    synced = await tree.sync(guild=GUILD)
+    if len(synced) == 0: raise Exception("Unable to synchronise slash commands.")
 
 @client.event
 async def on_message(message):
