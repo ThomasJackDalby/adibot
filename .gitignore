@@ -41,3 +41,7 @@ cover/
 # Environments
 .venv
 .env
+
+*.csv
+.scripts
+.data
