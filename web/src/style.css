@@ -1,0 +1,26 @@
+.hello {
+  color: red;
+}
+
+circle {
+	fill: #ddd;
+}
+
+rect {
+	fill: #ddd;
+}
+
+.plot-container {
+    /* margin: 10px; */
+    border-top: 2px solid black;
+}
+
+body {
+  font-family: "Audiowide", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+p {
+  margin: 0px;
+}
