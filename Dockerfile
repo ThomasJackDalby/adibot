@@ -16,6 +16,7 @@ COPY utils.py /app
 ## web-container
 FROM base AS web
 
+COPY schemas.py /app
 COPY app.py /app
 COPY web/dist /app/static
 

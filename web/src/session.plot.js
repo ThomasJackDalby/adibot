@@ -17,9 +17,9 @@ export class SessionPlot extends BasePlot {
     async update(api) {
         let session = await api.get("/api/v1/sessions/1");
 
-        session.members = d3.map(session.members, sessionMember => {
-            "startDate" : 
-        })
+        // session.members = d3.map(session.members, sessionMember => {
+        //     "startDate" : 
+        // })
 
         let memberGroup = this.root
             .selectAll('g')

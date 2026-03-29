@@ -1,17 +1,6 @@
-import os
+SESSION_START_WEEKDAY = 6 # 0=Mon, 1=Tues ... 6=Sun
+SESSION_START_HOUR = 19
+SESSION_END_WEEKDAY = 1 # 0=Mon, 1=Tues ... 6=Sun
+SESSION_END_HOUR = 3
 
-SESSION_START_WEEKDAY = 4 # 0=Mon, 1=Tues ... 6=Sun
-SESSION_START_TIME = 18
-SESSION_END_WEEKDAY = 5 # 0=Mon, 1=Tues ... 6=Sun
-SESSION_END_TIME = 6
-
-CONNECTION_STRING = os.environ.get("CONNECTION_STRING")
-DISCORD_TOKEN = os.environ.get('DISCORD_TOKEN')
-DISCORD_GUILD_ID = os.environ.get('DISCORD_GUILD_ID')
-
-ADMIN_NAME = os.environ.get('ADMIN_NAME')
-ADMIN_DISCORD_NAME = os.environ.get('ADMIN_DISCORD_NAME')
-
-MASTER_API_TOKEN = os.environ.get('MASTER_API_TOKEN')
-
-STATIC_PATH = os.environ.get("STATIC_PATH", "static")
+SESSION = "4 19 5 3"

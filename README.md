@@ -24,14 +24,16 @@ docker push 192.168.0.100:3000/dalby/adibot-web
 docker push 192.168.0.100:3000/dalby/adibot-bot
 ```
 
-## Command Ideas
+## Environments
 
-/stats <discord-member>
+- Dev
+    - Local SQLite Memory
+    - Local SQLite File
+    - Local Postgres Database
+- Prod
+    - Remote Postgres Database
 
-Gives stats on member such as:
-- total sessions attended
-- total games played
-- longest session streak
+## API
 
 ## Dashboard
 
@@ -50,3 +52,19 @@ The dashboard should have the following plots/charts:
 
 - games_master_count
 - attendance_count,.,//,,
+
+## Command Ideas
+
+/stats <discord-member>
+
+Gives stats on member such as:
+- total sessions attended
+- total games played
+- longest session streak
+
+## Design
+
+Member
+Session
+Game
+SessionMember - The members within a session

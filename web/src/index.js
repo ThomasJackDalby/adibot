@@ -19,7 +19,6 @@ body.append("h1")
     // .style("grid-column-end", 3)
     .text("ADIBOT - DASHBOARD");
 
-
 let data = await api.get("/api/v1/games-master-succession")
 console.log(data)
 
@@ -31,10 +30,10 @@ body.append("p")
     .text("BACKUPS ARE: "+data[1].member_name.toUpperCase());
 
 let charts = [
-    new SessionPlot(),
-    new GamesMasterCountChart(),
-    new DaysSinceGamesMasterChart(),
-    new TotalAttendanceCountChart(),
+    // new SessionPlot(),
+    // new GamesMasterCountChart(),
+    // new DaysSinceGamesMasterChart(),
+    // new TotalAttendanceCountChart(),
 ]
 
 for(let i=0;i<charts.length;i++) {

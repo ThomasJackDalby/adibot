@@ -5,7 +5,8 @@ services:
     ports:
     - "8000:8000"
     environment:
-      CONNECTION_STRING: "postgresql+psycopg2://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@database/${DATABASE_USERNAME}"
+      CONNECTION_STRING: "postgresql+psycopg2://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOSTNAME}/${DATABASE_NAME}"
+      MASTER_API_TOKEN: $(MASTER_API_TOKEN)
   bot:
     build:
       target: bot
@@ -14,9 +15,9 @@ services:
       ADMIN_DISCORD_NAME: ${ADMIN_DISCORD_NAME}
       DISCORD_TOKEN: ${DISCORD_TOKEN}
       DISCORD_GUILD_ID: ${DISCORD_GUILD_ID}
-      CONNECTION_STRING: "postgresql+psycopg2://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@database/${DATABASE_USERNAME}"
+      CONNECTION_STRING: "postgresql+psycopg2://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOSTNAME}/${DATABASE_NAME}"
   database:
-    hostname: "database"
+    hostname: "${DATABASE_HOSTNAME}"
     image: "postgres:latest"
     restart: always
     environment:
