@@ -8,25 +8,21 @@ RUN apt-get update
 RUN apt-get -y install libpq-dev gcc
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY model.py /app
-COPY data.py /app
+FROM base AS adibot
+
+# copy python files
+COPY adibot.py /app
+COPY app.py /app
+COPY bot.py /app
 COPY constants.py /app
+COPY data.py /app
+COPY model.py /app
+COPY schemas.py /app
 COPY utils.py /app
 
-## web-container
-FROM base AS web
-
-COPY schemas.py /app
-COPY app.py /app
+# copy dashboard files
 COPY web/dist /app/static
 
 EXPOSE 8000
 
-CMD ["fastapi", "run", "app.py"]
-
-# bot-container
-FROM base AS bot
-
-COPY bot.py /app
-
-CMD ["python", "bot.py"]
+CMD ["python", "adibot.py"]

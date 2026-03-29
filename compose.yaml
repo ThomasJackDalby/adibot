@@ -1,21 +1,16 @@
 services:
-  web:
-    build:
-      target: web
-    ports:
-    - "8000:8000"
-    environment:
-      CONNECTION_STRING: "postgresql+psycopg2://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOSTNAME}/${DATABASE_NAME}"
-      MASTER_API_TOKEN: $(MASTER_API_TOKEN)
-  bot:
-    build:
-      target: bot
+  adibot:
+    build: .
     environment:
       ADMIN_NAME: ${ADMIN_NAME}
       ADMIN_DISCORD_NAME: ${ADMIN_DISCORD_NAME}
       DISCORD_TOKEN: ${DISCORD_TOKEN}
       DISCORD_GUILD_ID: ${DISCORD_GUILD_ID}
+      MASTER_API_TOKEN: ${MASTER_API_TOKEN}
+      STATIC_PATH: static
       CONNECTION_STRING: "postgresql+psycopg2://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOSTNAME}/${DATABASE_NAME}"
+    ports:
+    - "8000:8000"
   database:
     hostname: "${DATABASE_HOSTNAME}"
     image: "postgres:latest"
