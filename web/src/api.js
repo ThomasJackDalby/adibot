@@ -1,7 +1,8 @@
 export default class Api { 
 
     constructor() {
-        this.rootUrl = "http://localhost"
+        //this.rootUrl = "http://localhost"
+        this.rootUrl = "http://192.168.0.100"
         this.port = 8000;
         this.cache = {}
     }

@@ -368,8 +368,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-static_path = os.environ["STATIC_PATH"]
-app.mount("/", fastapi.staticfiles.StaticFiles(directory=static_path, html = True), name="static")
+
+app.mount("/", fastapi.staticfiles.StaticFiles(directory=os.environ["STATIC_PATH"], html = True), name="static")
+
+## int(os.environ["PORT"])
 
 async def main():
     config = uvicorn.Config(app=app, host="0.0.0.0", port=8000, log_config=None)

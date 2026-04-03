@@ -2,6 +2,7 @@ import os
 import datetime
 import constants
 import sqlalchemy
+import dotenv
 import utils
 import logging
 import sqlalchemy.orm
@@ -10,6 +11,9 @@ from typing import Optional
 from model import Base, Session, Member, Game, SessionMember, SessionMemberGame
 
 logger = logging.getLogger("adibot")
+
+if os.path.exists(".env"): logger.info("Loading env variables from .env file.")
+dotenv.load_dotenv()
 
 CONNECTION_STRING = os.environ["CONNECTION_STRING"]
 _engine = None
