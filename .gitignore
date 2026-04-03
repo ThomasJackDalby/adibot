@@ -43,7 +43,6 @@ cover/
 .env
 
 *.csv
-.scripts
 .data
 
 node_modules
