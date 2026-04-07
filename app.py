@@ -13,6 +13,7 @@ import dotenv
 import uvicorn
 import asyncio
 import data
+from constants import MASTER_API_TOKEN
 from schemas import (
     PostSessionRequest,
     PutSessionRequest,
@@ -22,8 +23,6 @@ from schemas import (
 )
 
 logger = logging.getLogger("adibot")
-
-MASTER_API_TOKEN = os.environ['MASTER_API_TOKEN']
 
 def get_auth_user(token: str = fastapi.Depends(fastapi.security.APIKeyHeader(name="token"))):
     logger.debug(f"token: {token} vs {MASTER_API_TOKEN}")

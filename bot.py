@@ -9,14 +9,10 @@ from data import DataBaseSession
 import utils
 import constants
 import logging
+from constants import DISCORD_GUILD_ID, ADMIN_NAME, ADMIN_DISCORD_NAME, DISCORD_TOKEN
 
 from model import Member, Session
 from typing import Optional, Union
-
-DISCORD_TOKEN = os.environ['DISCORD_TOKEN']
-DISCORD_GUILD_ID = int(os.environ['DISCORD_GUILD_ID'])
-ADMIN_NAME = os.environ['ADMIN_NAME']
-ADMIN_DISCORD_NAME = os.environ['ADMIN_DISCORD_NAME']
 
 logger = logging.getLogger("adibot")
 

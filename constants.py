@@ -1,4 +1,15 @@
-SESSION_START_WEEKDAY = 6 # 0=Mon, 1=Tues ... 6=Sun
-SESSION_START_HOUR = 19
-SESSION_END_WEEKDAY = 1 # 0=Mon, 1=Tues ... 6=Sun
-SESSION_END_HOUR = 3
+import os
+
+
+SESSION = [int(t) for t in os.environ.get('SESSION', "4 19 5 3").split(" ")]
+SESSION_START_WEEKDAY = SESSION[0] # 0=Mon, 1=Tues ... 6=Sun
+SESSION_START_HOUR = SESSION[1]
+SESSION_END_WEEKDAY = SESSION[2] # 0=Mon, 1=Tues ... 6=Sun
+SESSION_END_HOUR = SESSION[3]
+
+DISCORD_TOKEN = os.environ['DISCORD_TOKEN']
+DISCORD_GUILD_ID = int(os.environ['DISCORD_GUILD_ID'])
+ADMIN_NAME = os.environ['ADMIN_NAME']
+ADMIN_DISCORD_NAME = os.environ['ADMIN_DISCORD_NAME']
+
+MASTER_API_TOKEN = os.environ['MASTER_API_TOKEN']
