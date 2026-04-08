@@ -6,7 +6,7 @@ import rich.logging
 
 FORMAT = "%(message)s"
 handler = rich.logging.RichHandler(rich_tracebacks=True)
-handler.addFilter(logging.Filter(name='adibot'))
+# handler.addFilter(logging.Filter(name='adibot'))
 logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt="[%X]", handlers=[handler])
 
 logger = logging.getLogger("adibot")
