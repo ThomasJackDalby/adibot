@@ -4,34 +4,39 @@ import subprocess
 import re
 import sys
 
-commit_msg = ""
+FILE_NAME = "version.py"
 
-# commit_msg_file = sys.argv[1]
-# with open(commit_msg_file, 'r') as file:
-#     commit_msg = file.read().strip()
+def get_git_hash() -> str:
+    return subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
 
-version_file = os.path.abspath('version.py')
-hashed_code = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
+def get_current_version(file_path) -> tuple[int, int, int, str | None]:
+    if os.path.exists(file_path):
+        print(f'Reading previous {file_path}')
+        with open(file_path, 'r') as f:
+            content = f.read()
+            major, minor, patch = map(int, re.search(r'version = "(\d+)\.(\d+)\.(\d+)"', content).groups())
+        patch += 1
+    else:
+        print(f'Creating new {file_path}')
+        major, minor, patch = 0, 0, 1
+    return major, minor, patch, None
 
-if os.path.exists(version_file):
-    print(f'Reading previous {version_file}')
-    with open(version_file, 'r') as f:
-        content = f.read()
-        major, minor, patch = map(int, re.search(r'version = "(\d+)\.(\d+)\.(\d+)"', content).groups())
-    patch += 1
-else:
-    print(f'Creating new {version_file}')
-    major, minor, patch = 0, 0, 1
-print(f'Writing contents of {version_file} with "{commit_msg}"')
+def write(file_path, major, minor, patch, suffix, hashed_code):
+    with open(file_path, 'w') as f:
+        f.write(f'''# auto-generated
+                
+    class Version:
+        hash = "{hashed_code}"
+        version = "{major}.{minor}.{patch}"
 
-with open(version_file, 'w') as f:
-    f.write(f'''# This file is created by the pre-push script
-class Version:
-    comment = "{commit_msg}"
-    hash = "{hashed_code}"
-    version = "{major}.{minor}.{patch}"
-if __name__ == "__main__":
-    print(Version.version)
-''')
-    
-subprocess.call(['git', 'add', version_file])
+    if __name__ == "__main__":
+        print(Version.version)
+    ''')
+        
+def main():
+    file_path = os.path.abspath(FILE_NAME)
+
+    major, minor, patch, suffix = get_current_version()
+    hashed_code = get_git_hash()
+    write(file_path, major, minor, patch, suffix, hashed_code)
+    subprocess.call(['git', 'add', file_path])
