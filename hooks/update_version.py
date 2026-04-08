@@ -4,11 +4,11 @@ import subprocess
 import re
 import sys
 
-print("Running pre-commit")
+commit_msg = ""
 
-commit_msg_file = sys.argv[1]
-with open(commit_msg_file, 'r') as file:
-    commit_msg = file.read().strip()
+# commit_msg_file = sys.argv[1]
+# with open(commit_msg_file, 'r') as file:
+#     commit_msg = file.read().strip()
 
 version_file = os.path.abspath('version.py')
 hashed_code = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
