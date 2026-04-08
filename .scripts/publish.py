@@ -6,7 +6,7 @@ GITEA_USERNAME = "dalby"
 DOCKER_IMAGES = [
     ["adibot", "adibot"],
 ]
-VERSION = "v0.1.0-beta"
+VERSION = "v0.1.1-beta"
 
 def main(args):
     for image_name, docker_target in DOCKER_IMAGES:
