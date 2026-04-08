@@ -1,9 +1,15 @@
 repos:
 - repo: local
   hooks:
-  - id: update_version
-    name: update_version
-    entry: python ./hooks/update_version.py
+  # - id: update_version
+  #   name: update_version
+  #   entry: python ./hooks/update_version.py
+  #   language: python
+  #   always_run: true
+  #   pass_filenames: false
+  - id: hook_test
+    name: hook_test
+    entry: python hook_test.py
     language: python
     always_run: true
     pass_filenames: false
