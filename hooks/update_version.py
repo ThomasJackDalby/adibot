@@ -35,8 +35,7 @@ def write(file_path, major, minor, patch, suffix, hashed_code):
         
 def main():
     file_path = os.path.abspath(FILE_NAME)
-
-    major, minor, patch, suffix = get_current_version()
+    major, minor, patch, suffix = get_current_version(file_path)
     hashed_code = get_git_hash()
     write(file_path, major, minor, patch, suffix, hashed_code)
     subprocess.call(['git', 'add', file_path])
