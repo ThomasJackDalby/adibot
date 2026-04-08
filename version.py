@@ -1,8 +1,8 @@
 # auto-generated
                 
 class Version:
-    hash = "ddd4fb9860170910c07fd70cfc0a553b749b3010"
-    version = "0.0.9"
+    hash = "5ccad88596037181732c767f56504f432db4a70c"
+    version = "0.0.11"
 
 if __name__ == "__main__":
     print(Version.version)

@@ -14,7 +14,7 @@ def get_current_version(file_path) -> tuple[int, int, int, str | None]:
         print(f'Reading previous {file_path}')
         with open(file_path, 'r') as f:
             content = f.read()
-            major, minor, patch, suffix = re.search(r'version = \"(\d+)\.(\d+)\.(\d+)([^\"]*)\"', content).groups()
+            major, minor, patch, suffix = re.search(r'version = "(\d+)\.(\d+)\.(\d+)([^"]*)"', content).groups()
             print(major, minor, patch, suffix)
             major, minor, patch = int(major), int(minor), int(patch)
         patch += 1
