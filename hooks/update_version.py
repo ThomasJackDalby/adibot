@@ -22,6 +22,7 @@ def get_current_version(file_path) -> tuple[int, int, int, str | None]:
     return major, minor, patch, None
 
 def write(file_path, major, minor, patch, suffix, hashed_code):
+    print("Writing out updated version file.")
     with open(file_path, 'w') as f:
         f.write(f'''# auto-generated
                 

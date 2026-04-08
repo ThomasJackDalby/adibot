@@ -13,5 +13,3 @@ ADMIN_NAME = os.environ['ADMIN_NAME']
 ADMIN_DISCORD_NAME = os.environ['ADMIN_DISCORD_NAME']
 
 MASTER_API_TOKEN = os.environ['MASTER_API_TOKEN']
-
-# test
