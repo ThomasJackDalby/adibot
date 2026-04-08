@@ -22,6 +22,8 @@ from schemas import (
     PostSessionMemberRequest
 )
 
+# test
+
 logger = logging.getLogger("adibot")
 
 def get_auth_user(token: str = fastapi.Depends(fastapi.security.APIKeyHeader(name="token"))):
