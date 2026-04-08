@@ -14,25 +14,26 @@ def get_current_version(file_path) -> tuple[int, int, int, str | None]:
         print(f'Reading previous {file_path}')
         with open(file_path, 'r') as f:
             content = f.read()
-            major, minor, patch = map(int, re.search(r'version = "(\d+)\.(\d+)\.(\d+)"', content).groups())
+            major, minor, patch, suffix = re.search(r'version = "(\d+)\.(\d+)\.(\d+)([^"]*)"', content).groups()
+            major, minor, patch = int(major), int(minor), int(patch)
         patch += 1
     else:
         print(f'Creating new {file_path}')
-        major, minor, patch = 0, 0, 1
-    return major, minor, patch, None
+        major, minor, patch, suffix = 0, 0, 1, None
+    return major, minor, patch, suffix
 
 def write(file_path, major, minor, patch, suffix, hashed_code):
-    print("Writing out updated version file.")
+    version = f"{major}.{minor}.{patch}{suffix}"
     with open(file_path, 'w') as f:
         f.write(f'''# auto-generated
                 
-    class Version:
-        hash = "{hashed_code}"
-        version = "{major}.{minor}.{patch}"
+class Version:
+    hash = "{hashed_code}"
+    version = "{version}"
 
-    if __name__ == "__main__":
-        print(Version.version)
-    ''')
+if __name__ == "__main__":
+    print(Version.version)
+''')
         
 def main():
     file_path = os.path.abspath(FILE_NAME)
