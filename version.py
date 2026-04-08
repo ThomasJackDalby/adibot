@@ -1,7 +1,9 @@
-# This file is created by the pre-push script
-class Version:
-    comment = ""
-    hash = "18e79934275404187866e688129dbaf467754d14"
-    version = "0.0.2"
-if __name__ == "__main__":
-    print(Version.version)
+# auto-generated
+                
+    class Version:
+        hash = "e63e560775a01fb09238780d700747e14c806d25"
+        version = "0.0.3"
+
+    if __name__ == "__main__":
+        print(Version.version)
+    

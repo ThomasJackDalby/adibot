@@ -40,3 +40,6 @@ def main():
     hashed_code = get_git_hash()
     write(file_path, major, minor, patch, suffix, hashed_code)
     subprocess.call(['git', 'add', file_path])
+
+if __name__ == "__main__":
+    main()
