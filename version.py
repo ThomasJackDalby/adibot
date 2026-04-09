@@ -2,9 +2,9 @@
 
 MAJOR = 0
 MINOR = 1
-PATCH = 1
-SUFFIX = "beta"
-VERSION = "v0.0.12"
-VERSION_FULL = "v0.0.12-beta@abdf3876"
-HASH_SHORT = "abdf3876"
-HASH = "abdf3876ef8e7c078689a310bb617674818efe39"
+PATCH = 2
+TAG = "beta"
+VERSION = "v0.1.2"
+VERSION_FULL = "v0.1.2-beta@00b1a8ad"
+HASH_SHORT = "00b1a8ad"
+HASH = "00b1a8ad25b692035a19d0b6d765603fd0888e6a"
