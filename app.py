@@ -86,8 +86,8 @@ async def get_session_by_id_full(session_id: int):
                     "id" : session_member_game.id,
                     "gameId" : session_member_game.game.id,
                     "gameName" : session_member_game.game.name,
-                    "start" : session_member.start,
-                    "end" : session_member.end,
+                    "start" : session_member_game.start,
+                    "end" : session_member_game.end,
                     } for session_member_game in session_member.session_member_games]
                 } for session_member in session.session_members],
         }

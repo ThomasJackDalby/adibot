@@ -279,7 +279,7 @@ class DataBaseSession:
                 logger.warning("Cannot end a session_member_game as one is not pending.")
                 return None
         
-        logger.debug(f"Updated session_member [{session_member_game.id}] for session_member [{session_member_id}] and game [{game_id}] end to {datetime}.")
+        logger.debug(f"Updated session_member_game [{session_member_game.id}] for session_member [{session_member_id}] and game [{game_id}] end to {datetime}.")
         session_member_game.end = datetime
         self._session.commit()
         return session_member_game
