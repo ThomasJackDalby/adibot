@@ -147,7 +147,7 @@ async def add_or_update_session_member(
             return
 
         session = db.get_or_create_session_with_date(current_datetime.date())
-        db.add_or_update_session_member(session.id, member.id, datetime=current_datetime, is_end=is_end)
+        session_member = db.add_or_update_session_member(session.id, member.id, datetime=current_datetime, is_end=is_end)
 
         # TODO: If we're ending the voice chat, end the session_member and any pending session_member_games
 

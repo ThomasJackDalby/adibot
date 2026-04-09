@@ -202,19 +202,20 @@ class DataBaseSession:
             datetime: datetime.datetime,
             is_end: bool) -> SessionMember | None:
         
-        pending_session_member = self.get_pending_session_member_for_session_and_member(session_id, member_id)
+        session_member = self.get_pending_session_member_for_session_and_member(session_id, member_id)
 
         if not is_end: 
-            if pending_session_member is not None:
+            if session_member is not None:
                 logger.warning("Cannot start a session_member as one is already pending.")
-                return pending_session_member            
+                return session_member            
             return self.add_session_member(session_id, member_id, start=datetime)
-        if pending_session_member is None:
+        if session_member is None:
             logger.warning("Cannot end a session_member as one is not pending.")
             return None
-        pending_session_member.end = datetime
+        logger.debug(f"Updated session_member [{session_member.id}] for session [{session_id}] and member [{member_id}] end to {datetime}.")
+        session_member.end = datetime
         self._session.commit()
-        return pending_session_member
+        return session_member
 
 # -- SessionMemberGame --
 
@@ -231,7 +232,7 @@ class DataBaseSession:
         return self._session.scalars(select(SessionMemberGame)
             .where(SessionMemberGame.session_member_id == session_member_id)).all()
     
-    def get_pending_session_member_game_for_session_and_member(self, session_member_id: int, game_id: int) -> SessionMemberGame | None:
+    def get_pending_session_member_game_for_session_member_and_game(self, session_member_id: int, game_id: int) -> SessionMemberGame | None:
         return self._session.scalars(select(SessionMemberGame)
             .where(SessionMemberGame.session_member_id == session_member_id)
             .where(SessionMemberGame.game_id == game_id)
@@ -254,6 +255,7 @@ class DataBaseSession:
             start = start,
             end = end
         )
+        logger.debug(f"Adding session_member_game [{session_member_game.id}] for session_member [{session_member_id}] and game [{game_id}] start to {start}.")
         self._session.add(session_member_game)
         self._session.commit()
         return session_member_game
@@ -266,19 +268,21 @@ class DataBaseSession:
             is_end: bool
             ) -> SessionMemberGame | None:
         
-        pending_session_member_game = self.get_pending_session_member_game_for_session_and_member(session_member_id, game_id)
+        session_member_game = self.get_pending_session_member_game_for_session_member_and_game(session_member_id, game_id)
         if not is_end: 
-            if pending_session_member_game is not None:
+            if session_member_game is not None:
                 logger.warning("Cannot start a session_member_game as one is pending.")
-                return pending_session_member_game
+                return session_member_game   
             return self.add_session_member_game(session_member_id, game_id, start=datetime)
         
-        if pending_session_member_game is None:
+        if session_member_game is None:
                 logger.warning("Cannot end a session_member_game as one is not pending.")
                 return None
-        pending_session_member_game.end = datetime
+        
+        logger.debug(f"Updated session_member [{session_member_game.id}] for session_member [{session_member_id}] and game [{game_id}] end to {datetime}.")
+        session_member_game.end = datetime
         self._session.commit()
-        return pending_session_member_game
+        return session_member_game
 
 ## -- stats
 
