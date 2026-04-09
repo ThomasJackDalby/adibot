@@ -150,7 +150,7 @@ async def add_or_update_session_member(
         db.add_or_update_session_member(session.id, member.id, datetime=current_datetime, is_end=is_end)
 
         # TODO: If we're ending the voice chat, end the session_member and any pending session_member_games
-7
+
 async def on_user_starts_activity(discord_member: discord.Member, activity: ActivityTypes):
     logger.debug(f"{discord_member.name} has started activity [{activity.name}].")
     await add_or_update_session_member_game(discord_member, activity)
