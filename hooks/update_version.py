@@ -22,6 +22,7 @@ class Version:
     hash: str
 
 def load_version(file_path) -> Version | None:
+    print(file_path)
     if not os.path.exists(file_path): return None
     with open(file_path, "r") as file:
         values = [[part.strip() for part in line.strip().split("=")] for line in file.readlines()]
