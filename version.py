@@ -1,8 +1,10 @@
 # auto-generated
-                
-class Version:
-    hash = "abdf3876ef8e7c078689a310bb617674818efe39"
-    version = "0.0.12"
 
-if __name__ == "__main__":
-    print(Version.version)
+MAJOR = 0
+MINOR = 1
+PATCH = 1
+SUFFIX = "beta"
+VERSION = "v0.0.12"
+VERSION_FULL = "v0.0.12-beta@abdf3876"
+HASH_SHORT = "abdf3876"
+HASH = "abdf3876ef8e7c078689a310bb617674818efe39"

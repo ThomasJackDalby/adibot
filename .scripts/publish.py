@@ -1,12 +1,13 @@
 import subprocess
 import argparse
+from version import VERSION
 
 GITEA_URL = "192.168.0.100:3000"
 GITEA_USERNAME = "dalby"
 DOCKER_IMAGES = [
     ["adibot", "adibot"],
 ]
-VERSION = "v0.1.1-beta"
+# VERSION = "v0.1.1-beta"
 
 def main(args):
     for image_name, docker_target in DOCKER_IMAGES:
@@ -20,3 +21,13 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     main(vars(parser.parse_args()))
+
+
+# MAJOR = 0
+# MINOR = 1
+# PATCH = 1
+# SUFFIX = ""
+
+# HASH = "abdf3876ef8e7c078689a310bb617674818efe39"
+# VERSION = "v0.0.12"
+# VERSION_FULL = "v0.0.12-beta@abdf3876"

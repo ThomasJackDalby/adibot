@@ -22,8 +22,6 @@ from schemas import (
     PostSessionMemberRequest
 )
 
-# test
-
 logger = logging.getLogger("adibot")
 
 def get_auth_user(token: str = fastapi.Depends(fastapi.security.APIKeyHeader(name="token"))):
@@ -33,7 +31,7 @@ def get_auth_user(token: str = fastapi.Depends(fastapi.security.APIKeyHeader(nam
 public = fastapi.APIRouter(prefix="/api/v1")
 authenticated = fastapi.APIRouter(prefix="/api/v1", dependencies=[fastapi.Depends(get_auth_user)])
 
-# -- sessions 
+# -- sessions
 
 @public.get("/sessions")
 async def get_sessions(date_str: str | None = None):
