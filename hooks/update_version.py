@@ -7,6 +7,9 @@ import re
 import sys
 import json
 from dataclasses import dataclass
+import logging
+
+logger = logging.getLogger(__file__)
 
 FILE_NAME = "version.py"
 
@@ -55,5 +58,5 @@ def main():
     # write(file_path, major, minor, patch, hashed_code)
     # subprocess.call(['git', 'add', file_path])
 
-print("got to here")
+logger.info("got to here")
 main()
