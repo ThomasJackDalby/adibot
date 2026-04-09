@@ -45,6 +45,7 @@ def load_version(file_path) -> Version | None:
 # ''')
         
 def main():
+    print("running main")
     file_path = os.path.abspath(FILE_NAME)
     version = load_version(file_path)
 
@@ -54,4 +55,5 @@ def main():
     # write(file_path, major, minor, patch, hashed_code)
     # subprocess.call(['git', 'add', file_path])
 
+print("got to here")
 main()
