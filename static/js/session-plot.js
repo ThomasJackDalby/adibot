@@ -60,12 +60,23 @@ export class SessionPlot extends BasePlot {
         data = d3.sort(data, member => member.name);
         
         // get session start/end datetime
+       
         let sessionStart = d3.map(session.sessionMembers, sessionMember => new Date(sessionMember.start))
             .reduce((a, b) => a.getTime() < b.getTime() ? a : b);
         sessionStart.setMinutes(sessionStart.getMinutes()-30);
+        let latestSessionStart = new Date(sessionStart.valueOf())
+        latestSessionStart.setHours(19)
+        latestSessionStart.setMinutes(0);
+        if (sessionStart.getTime() > latestSessionStart.getTime()) sessionStart = latestSessionStart;
+
         let sessionEnd = d3.map(session.sessionMembers, sessionMember => new Date(sessionMember.end))
             .reduce((a, b) => a.getTime() > b.getTime() ? a : b);
         sessionEnd.setMinutes(sessionEnd.getMinutes()+30);
+        let earliestSessionEnd = new Date(sessionEnd.valueOf())
+        earliestSessionEnd.setHours(23)
+        earliestSessionEnd.setMinutes(0);
+        if (sessionEnd.getTime() < earliestSessionEnd.getTime()) sessionEnd = earliestSessionEnd;   
+
         const scaleTime = d3.scaleTime([sessionStart, sessionEnd], [100, this.plotWidth-100]);
 
         this.root.append("g")
@@ -100,6 +111,20 @@ export class SessionPlot extends BasePlot {
             gridTime.setMinutes(gridTime.getMinutes()+15);
         }
 
+        // add the current time
+        let now = new Date(Date.now());
+        let isSessionLive = now.getTime() > sessionStart.getTime() && now.getTime() < sessionEnd.getTime();
+        if (isSessionLive)
+        {
+            this.root.append("line")
+                .attr("x1", scaleTime(now))
+                .attr("x2", scaleTime(now))
+                .attr("y1", marginTop)
+                .attr("y2", marginTop+session.members.length*memberHeight)
+                // .attr("stroke-dasharray", 4)
+                .attr("stroke", "red")
+        }
+
         // create a line for each member
         // members is actually session_members
         let member = this.root.selectAll("g.member")
@@ -118,35 +143,40 @@ export class SessionPlot extends BasePlot {
             .attr('y', d => d.yMid)
             .text(function (d) { return d.name });
          
-        let memberSessions = member.selectAll("g.member-session")
+        let sessionMember = member.selectAll("g.member-session")
             .data(d => d.sessions)
             .join("g")
             .attr("class", "member-session");
 
-        memberSessions.append("line")
-            .attr("x1", d => scaleTime(new Date(d.start)))
-            .attr("x2", d => scaleTime(new Date(d.end)))
-            .attr("y1", d => d.yMid)
-            .attr("y2", d => d.yMid)
-            .attr("stroke", "black")
-
-        memberSessions.append("rect")
+        sessionMember.append("rect")
+            .filter(d => d.start != null)
+            .filter(d => d.end != null || isSessionLive)
             .attr("x", d => scaleTime(new Date(d.start)))
             .attr("y", d => d.yMid-memberLineHeight/2)
-            .attr("width", d => scaleTime(new Date(d.end)) - scaleTime(new Date(d.start)))
+            .attr("width", d => {
+                let end = d.end != null ? new Date(d.end) : now;
+                return scaleTime(end) - scaleTime(new Date(d.start))
+            })
             .attr("height", memberLineHeight)
             .attr("stroke", "black")
             .style("fill", "white")
         
-        let sessionMemberGames = memberSessions.selectAll("g.session-member-game")
+        let sessionMemberGames = sessionMember
+            .selectAll("g.session-member-game")
             .data(d => d.sessionMemberGames)
             .join("g")
             .attr("class", "member-session-game");
 
-        sessionMemberGames.append("rect")
+        sessionMemberGames
+            .filter(d => d.start != null)
+            .filter(d => d.end != null || isSessionLive)
+            .append("rect")
             .attr("x", d => scaleTime(new Date(d.start)))
             .attr("y", d => d.yMid-gameLineHeight/2)
-            .attr("width", d => scaleTime(new Date(d.end)) - scaleTime(new Date(d.start)))
+            .attr("width", d => {
+                let end = d.end != null ? new Date(d.end) : now;
+                return scaleTime(end) - scaleTime(new Date(d.start))
+            })
             .attr("height", gameLineHeight)
             .attr("stroke", "black")
             .style("fill", d => d.gameFill) 

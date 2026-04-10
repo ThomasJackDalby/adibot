@@ -32,6 +32,7 @@ class Game(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(32))
+    ignore: Mapped[bool] = mapped_column(Boolean, default=False)
 
     session_member_games: Mapped[list["SessionMemberGame"]] = relationship(back_populates="game")
 
