@@ -172,7 +172,7 @@ async def add_or_update_session_member_game(
             return
         
         if not isinstance(discord_activity, discord.Game):
-            logger.debug(f"[{discord_activity.name}] is not a game.")
+            logger.debug(f"[{discord_activity.name}] is not a game (it's a [{type(discord_activity)}])")
             return
         discord_game: discord.Game = discord_activity
 
