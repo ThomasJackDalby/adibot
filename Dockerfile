@@ -21,7 +21,8 @@ COPY schemas.py /app
 COPY utils.py /app
 
 # copy dashboard files
-COPY web/dist /app/static
+COPY static /app/static
+COPY templates /app/templates
 
 EXPOSE 8000
 
