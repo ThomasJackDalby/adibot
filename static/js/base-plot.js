@@ -9,9 +9,9 @@ export function formatText(selection) {
 }
 
 export default class BasePlot extends BasePanel {
-    create(parent, title) {
-        this.plotWidth = 1000;
-        this.plotHeight = 500;
+    create(parent, title, plotWidth = 1000, plotHeight = 500) {
+        this.plotWidth = plotWidth;
+        this.plotHeight = plotHeight;
 
         this.svg = parent.append("svg")
             .attr("width", "100%")

@@ -1,9 +1,10 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-import { SessionPlot } from "./session-plot.js";
+import { SessionPlot, SessionSummaryPanel } from "./session-plot.js";
 import Api from "./api.js";
 
 let panels = [
     new SessionPlot(sessionId),
+    new SessionSummaryPanel(sessionId),
 ];
 
 let api = new Api()
