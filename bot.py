@@ -118,10 +118,13 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
 
 @client.event
 async def on_presence_update(before: discord.Member, after: discord.Member):
-    if before.activity is None and after.activity is not None:
-        await on_user_starts_activity(after, after.activity)
-    elif after.activity is None and before.activity is not None:
+    if before.activity == after.activity:
+        logger.warning("Before activity is the same as the after activity.")
+        return
+    if before.activity is not None:
         await on_user_stops_activity(after, before.activity)
+    if after.activity is not None:
+        await on_user_starts_activity(after, after.activity)
 
 # -- Logic --
 
