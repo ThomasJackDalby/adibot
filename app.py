@@ -1,18 +1,17 @@
-import constants
 import datetime
 import fastapi
 import fastapi.responses
 import fastapi.security
 import fastapi.staticfiles
+import fastapi.templating
 import fastapi.middleware.cors
 import logging
 import model
 import os
+
 from data import DataBaseSession
-import dotenv
 import uvicorn
 import asyncio
-import data
 from constants import MASTER_API_TOKEN
 from schemas import (
     PostSessionRequest,
@@ -89,6 +88,8 @@ async def get_session_by_id_full(session_id: int):
             } for game in games],
             "sessionMembers" : [{
                 "id" : session_member.id,
+                "memberId" : session_member.member.id,
+                "memberName" : session_member.member.name,
                 "start" : session_member.start,
                 "end" : session_member.end,
                 "sessionMemberGames" : [{
@@ -365,8 +366,10 @@ async def import_table(files: list[fastapi.UploadFile]):
     # with DataBaseSession() as db:
         # table = db.get_table_from_name(table_name)
         # if table is None: raise fastapi.HTTPException(status_code=400, detail=f"No table with name {table_name} exists.") 
-        
+
 app = fastapi.FastAPI()
+
+
 app.include_router(public)
 app.include_router(authenticated)
 app.add_middleware(
@@ -376,6 +379,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+templates = fastapi.templating.Jinja2Templates(directory="templates")
+@app.get("/members/{id}", response_class=fastapi.responses.HTMLResponse)
+async def get_page_member(request: fastapi.Request, id: int):
+    with DataBaseSession() as db:
+        member = db.get_member_with_id(id)
+        if member is None: raise fastapi.HTTPException(status_code=404, detail="Member not found.") 
+
+    return templates.TemplateResponse(
+        request=request, name="member.html", context={"member": member}
+    )
+
+@app.get("/sessions/{id}", response_class=fastapi.responses.HTMLResponse)
+async def get_page_session(request: fastapi.Request, id: int):
+    with DataBaseSession() as db:
+        session = db.get_session_with_id(id)
+        if session is None: raise fastapi.HTTPException(status_code=404, detail="Member not found.") 
+
+    return templates.TemplateResponse(
+        request=request, name="session.html", context={"session": session}
+    )
 
 app.mount("/", fastapi.staticfiles.StaticFiles(directory=os.environ["STATIC_PATH"], html = True), name="static")
 
@@ -387,4 +411,10 @@ async def main():
     await server.serve()
 
 if __name__ == "__main__":
+    import rich.logging
+
+    handler = rich.logging.RichHandler(rich_tracebacks=True)
+    # handler.addFilter(logging.Filter(name='adibot'))
+    logging.basicConfig(level=logging.DEBUG, format="%(message)s", datefmt="[%X]", handlers=[handler])
+
     asyncio.run(main())

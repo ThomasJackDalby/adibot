@@ -1,7 +1,5 @@
 import asyncio
-import os
 import logging
-import dotenv
 import rich.logging
 
 FORMAT = "%(message)s"
@@ -11,9 +9,6 @@ logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt="[%X]", handlers
 
 logger = logging.getLogger("adibot")
 logger.info("Starting ADIBOT")
-
-if os.path.exists(".env"): logger.info("Loading env variables from .env file.")
-dotenv.load_dotenv()
 
 import bot
 import app

@@ -1,5 +1,11 @@
 import os
+import logging
+import dotenv
 
+logger = logging.getLogger("adibot")
+
+if os.path.exists(".env"): logger.info("Loading env variables from .env file.")
+dotenv.load_dotenv()
 
 SESSION = [int(t) for t in os.environ.get('SESSION', "4 19 5 3").split(" ")]
 SESSION_START_WEEKDAY = SESSION[0] # 0=Mon, 1=Tues ... 6=Sun

@@ -7,8 +7,11 @@
     <link href="/css/style.css" rel="stylesheet">
 </head>
 <body>
-    <h1>ADIBOT - DASHBOARD</h1>
+    <h1>SESSION {{ session.id }}</h1>
 
-    <script src="/js/index.js" type="module"></script>
+    <script>
+        var sessionId = {{ session.id }};
+    </script>
+    <script src="/js/session.js" type="module"></script>
 </body>
 </html>
