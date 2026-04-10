@@ -368,8 +368,6 @@ async def import_table(files: list[fastapi.UploadFile]):
         # if table is None: raise fastapi.HTTPException(status_code=400, detail=f"No table with name {table_name} exists.") 
 
 app = fastapi.FastAPI()
-
-
 app.include_router(public)
 app.include_router(authenticated)
 app.add_middleware(
@@ -401,9 +399,7 @@ async def get_page_session(request: fastapi.Request, id: int):
         request=request, name="session.html", context={"session": session}
     )
 
-app.mount("/", fastapi.staticfiles.StaticFiles(directory="static", html = True), name="static")
-
-## int(os.environ["PORT"])
+app.mount("/", fastapi.staticfiles.StaticFiles(directory=os.environ["STATIC_PATH"], html = True), name="static")
 
 async def main():
     config = uvicorn.Config(app=app, host="0.0.0.0", port=8000, log_config=None)
