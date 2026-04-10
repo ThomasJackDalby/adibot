@@ -171,17 +171,22 @@ async def add_or_update_session_member_game(
             logger.debug(f"The current date [{current_datetime}] is not a valid session.")
             return
         
-        if not isinstance(discord_activity, discord.Game):
+        if not isinstance(discord_activity, discord.Game | discord.Activity):
             logger.debug(f"[{discord_activity.name}] is not a game (it's a [{type(discord_activity)}])")
             return
-        discord_game: discord.Game = discord_activity
+        discord_game: discord.Game | discord.Activity = discord_activity
 
         member = db.get_member_by_discord_name(discord_member.name)
         if member is None: 
             logger.debug(f"[{discord_member.name}] is not a member of adibot.")
             return
 
-        game = db.get_or_create_game(discord_game.name)
+        game_name = discord_game.name
+        if game_name is None:
+            logger.warning("Cannot register game as discord_game.name is None.")
+            return
+        
+        game = db.get_or_create_game(game_name)
         session = db.get_or_create_session_with_date(current_datetime.date())
         session_member = db.get_pending_session_member_for_session_and_member(session.id, member.id)
         
