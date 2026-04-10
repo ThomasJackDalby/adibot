@@ -187,6 +187,10 @@ async def add_or_update_session_member_game(
             return
         
         game = db.get_or_create_game(game_name)
+        if game.ignore: 
+            logger.debug(f"{game_name} is an ignored activity.")
+            return
+        
         session = db.get_or_create_session_with_date(current_datetime.date())
         session_member = db.get_pending_session_member_for_session_and_member(session.id, member.id)
         
