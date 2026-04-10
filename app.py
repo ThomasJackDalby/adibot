@@ -286,7 +286,6 @@ async def get_games():
         return [{
                 "id" : game.id,
                 "name" : game.name,
-                "ignore" : game.ignore,
             } for game in db.get_games()]
     
 @public.get("/games/{id}")

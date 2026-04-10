@@ -116,7 +116,9 @@ class DataBaseSession:
     # --- Game ---
 
     def get_games(self) -> list[Game]:
-        return list(self._session.scalars(select(Game)).all())
+        return list(self._session.scalars(select(Game)
+            .where(Game.ignore == False))
+            .all())
 
     def get_games_for_session(self, session_id: int) -> list[Game]:
         return list(self._session.scalars(select(Game)
