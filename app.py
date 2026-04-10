@@ -72,7 +72,7 @@ async def get_session_by_id_full(session_id: int):
         games_master = db.get_member_with_id(session.games_master_id) if session.games_master_id is not None else None
 
         members = set(session_member.member for session_member in session.session_members)
-        games = set(session_member_game.game for session_member in session.session_members for session_member_game in session_member.games)
+        games = set(session_member_game.game for session_member in session.session_members for session_member_game in session_member.session_member_games)
 
         return {
             "id" : session.id,
