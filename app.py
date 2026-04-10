@@ -401,7 +401,7 @@ async def get_page_session(request: fastapi.Request, id: int):
         request=request, name="session.html", context={"session": session}
     )
 
-app.mount("/", fastapi.staticfiles.StaticFiles(directory=os.environ["STATIC_PATH"], html = True), name="static")
+app.mount("/", fastapi.staticfiles.StaticFiles(directory="static", html = True), name="static")
 
 ## int(os.environ["PORT"])
 
