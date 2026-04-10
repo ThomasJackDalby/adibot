@@ -71,18 +71,27 @@ async def get_session_by_id_full(session_id: int):
         if session is None: raise fastapi.HTTPException(status_code=403, detail=f"No session with id [{session_id}] exists.")
         games_master = db.get_member_with_id(session.games_master_id) if session.games_master_id is not None else None
 
+        members = set(session_member.member for session_member in session.session_members)
+        games = set(session_member_game.game for session_member in session.session_members for session_member_game in session_member.games)
+
         return {
             "id" : session.id,
             "date" : session.date,
             "gamesMaster" : games_master.name if games_master is not None else None,
             "members" : [{
+                "id" : member.id,
+                "name": member.name,
+                "discordName" : member.discord_name
+            } for member in members],
+            "games" : [{
+                "id" : game.id,
+                "name": game.name
+            } for game in games],
+            "sessionMembers" : [{
                 "id" : session_member.id,
-                "memberId" : session_member.member.id,
-                "memberName": session_member.member.name,
-                "discordName" : session_member.member.discord_name,
                 "start" : session_member.start,
                 "end" : session_member.end,
-                "games" : [{
+                "sessionMemberGames" : [{
                     "id" : session_member_game.id,
                     "gameId" : session_member_game.game.id,
                     "gameName" : session_member_game.game.name,
