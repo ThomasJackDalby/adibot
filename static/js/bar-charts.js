@@ -83,7 +83,7 @@ export class GamesMasterCountChart extends BarChart {
         const color = d3.scaleSequential([minCount, maxCount], d3.interpolatePiYG);
         this.bars.style('fill', d => {
             if (d.data.in_rotation) return color(d.count);
-            return "#34deeb";
+            return "#EEEEEE";
         });
     }
 }
