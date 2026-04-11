@@ -6,7 +6,6 @@ const marginTop = 50;
 const memberHeight = 80;
 const gameLineHeight = 60;
 const memberLineHeight = 2;
-
 const sessionStartHour = 19;
 
 function getRandomColor() {
@@ -23,6 +22,10 @@ for(let i=0;i<50;i++) {
     GAME_COLORS.push(getRandomColor())
 }
 
+function getColor(i, n) {
+    return "hsl("+360*(i / n)+",50%,50%)"; 
+}
+
 export class SessionPlot extends BasePlot {
 
     constructor(sessionId) {
@@ -32,11 +35,13 @@ export class SessionPlot extends BasePlot {
 
     async create(api, parent) {
         let session = await api.get("/api/v1/sessions/"+this.sessionId+"/full");
-        let plotHeight = 500; // session.members.length * memberHeight + marginTop;
+        session.games = session.games.sort((a, b) => d3.ascending(a.name, b.name));
+        let plotHeight = session.members.length * memberHeight + marginTop;
 
-        super.create(parent, "SESSION TIMELINE", 1000, 500);
+        super.create(parent, "SESSION TIMELINE", 1000, plotHeight);
 
         let data = session.members
+            .sort((a, b) => d3.ascending(a.name, b.name)) // sort by earliest arriver
             .map((member, i) =>
             {
                 member.yTop = (i-1) * memberHeight;
@@ -49,18 +54,19 @@ export class SessionPlot extends BasePlot {
                     sessionMember.yMid = member.yMid;
 
                     sessionMember.sessionMemberGames.forEach(d => {
-                        d.yMid = member.yMid
-                        d.gameFill = GAME_COLORS[session.games.findIndex(g => g.id == d.gameId)]
+                        d.yMid = member.yMid   
+                        d.gameFill = getColor(session.games.findIndex(g => g.id == d.gameId), session.games.length)
+                        console.log(d.gameFill)
                     }) 
 
                     return sessionMember;
                 });
                 return member;
             });
-        data = d3.sort(data, member => member.name);
+
+        console.log(data);
         
         // get session start/end datetime
-       
         let sessionStart = d3.map(session.sessionMembers, sessionMember => new Date(sessionMember.start))
             .reduce((a, b) => a.getTime() < b.getTime() ? a : b);
         sessionStart.setMinutes(sessionStart.getMinutes()-30);
@@ -72,11 +78,10 @@ export class SessionPlot extends BasePlot {
         let sessionEnd = d3.map(session.sessionMembers, sessionMember => new Date(sessionMember.end))
             .reduce((a, b) => a.getTime() > b.getTime() ? a : b);
         sessionEnd.setMinutes(sessionEnd.getMinutes()+30);
-        let earliestSessionEnd = new Date(sessionEnd.valueOf())
+        let earliestSessionEnd = new Date(sessionStart.valueOf())
         earliestSessionEnd.setHours(23)
         earliestSessionEnd.setMinutes(0);
         if (sessionEnd.getTime() < earliestSessionEnd.getTime()) sessionEnd = earliestSessionEnd;   
-
         const scaleTime = d3.scaleTime([sessionStart, sessionEnd], [100, this.plotWidth-100]);
 
         this.root.append("g")
@@ -183,9 +188,7 @@ export class SessionPlot extends BasePlot {
     }
 }
 
-const gameHeight = 100;
-
-
+const gameHeight = 40;
 
 export class SessionSummaryPanel extends BasePlot 
 {
@@ -198,13 +201,15 @@ export class SessionSummaryPanel extends BasePlot
         super.create(parent, "SESSION GAMES");
 
         let session = await api.get("/api/v1/sessions/"+this.sessionId+"/full");
+        session.games = session.games.sort((a, b) => d3.ascending(a.name, b.name));
         let data = session.games
+            .sort((a, b) => d3.ascending(a.name, b.name)) // sort by earliest arriver
             .map((game, i) =>
             {
                 game.yTop = i * gameHeight;
                 game.yMid = game.yTop + gameHeight / 2.0;
                 game.yBottom = game.yTop + gameHeight;
-                game.gameFill = GAME_COLORS[i]
+                game.gameFill = getColor(i, session.games.length)
                 // member.sessions = session.sessionMembers
                 //     .filter(d => d.memberId == member.id)
                 //     .map(function(sessionMember, j) {
@@ -219,7 +224,7 @@ export class SessionSummaryPanel extends BasePlot
         data = d3.sort(data, game => game.name);
         console.log(data);
 
-        let game = this.root
+        let game = this.plot
             .append("g")
             .selectAll("g")
             .data(data)

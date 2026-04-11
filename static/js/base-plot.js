@@ -27,6 +27,10 @@ export default class BasePlot extends BasePanel {
             .attr("x", 10)
             .attr("y", 20)
             .text(title)
+
+        this.plot = this.root
+            .append("g")
+            .attr("transform", "translate(0, 30)");
     }
 
     getPlotWidth() {
