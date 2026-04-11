@@ -13,9 +13,9 @@ class Member(Base):
     name: Mapped[str] = mapped_column(String(32))
     in_rotation: Mapped[bool] = mapped_column(Boolean, default=True)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
-    
+
     starting_games_master_session_count: Mapped[int] = mapped_column(Integer, default=0)
-    last_games_master_session: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_games_master_session_date: Mapped[date] = mapped_column(Date, nullable=True)
 
     games_master_sessions: Mapped["Session"] = relationship(back_populates="games_master")
     session_members: Mapped[list["SessionMember"]] = relationship(back_populates="member")

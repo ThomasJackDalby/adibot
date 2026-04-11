@@ -8,7 +8,7 @@ class BarChart extends BasePlot {
         this.bottomMargin = 20;
         this.topMargin = 50;
         this.barGap = 10;
-        this.maxRectHeight = super.getPlotHeight() - this.bottomMargin - this.topMargin;
+        this.maxRectHeight = super.getPlotHeight() - 30 - this.bottomMargin - this.topMargin;
     }
 
     async update(data) {
@@ -19,7 +19,7 @@ class BarChart extends BasePlot {
             .domain([0, maxCount])
             .range([0, this.maxRectHeight]);
         
-        let selection = this.root
+        let selection = this.plot
             .selectAll('g')
             .data(data)
             .join('g')
@@ -33,9 +33,10 @@ class BarChart extends BasePlot {
             .append("rect")
             .attr('x', 0)
             .attr('y', function (d, i) { 
-                let height = maxCount == 0 ? 0 : scale(d.count); 
+                let height = maxCount == 0 ? 0 : scale(d.count);
                 let y = parent.topMargin + parent.maxRectHeight - height;
                 if (isNaN(y)) return 0;
+                return y;
             })
             .attr('height', function (d, i) { return maxCount == 0 ? 0 : scale(d.count); })
             .attr('stroke', 'black')
@@ -60,17 +61,19 @@ class BarChart extends BasePlot {
     }
 }
 
-export class GamesMasterCountChart extends BarChart {  
-    
+export class GamesMasterCountChart extends BarChart {
     async create(api, parent) {
         super.create(parent, "GAMES MASTER COUNT");
 
         let members = await api.get("/api/v1/members");
-        let data = d3.map(members, function(member) {
-            return { 
+        let data = members
+            .map(member =>
+        {
+            return {
+                "data" : member,
                 "category" : member.name,
                 "count" : member.games_master_count
-             }
+            }
         });
 
         await super.update(data);
@@ -78,7 +81,10 @@ export class GamesMasterCountChart extends BarChart {
         let minCount = d3.min(data, d => d.count);
         let maxCount = d3.max(data, d => d.count);
         const color = d3.scaleSequential([minCount, maxCount], d3.interpolatePiYG);
-        this.bars.style('fill', (d, i) => color(d.count))
+        this.bars.style('fill', d => {
+            if (d.data.in_rotation) return color(d.count);
+            return "#34deeb";
+        });
     }
 }
 
@@ -91,7 +97,7 @@ export class DaysSinceGamesMasterChart extends BarChart {
         let data = d3.map(members, function(member) {
             return { 
                 "category" : member.name,
-                "count" : member.days_since_gm
+                "count" : member.days_since_games_master
             }
         });
         data.sort(function(x, y) {
@@ -119,7 +125,6 @@ export class TotalAttendanceCount extends BarChart {
                 "count" : member.total_attendance
             }
         });
-
 
         await super.update(data);
 

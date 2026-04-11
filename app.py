@@ -218,19 +218,20 @@ async def post_session_member_games(session_id: int, request: PostSessionMemberR
 
 @public.get("/members")
 async def get_members():
-
-    def format(member):
+    def format(member: model.Member):
         last_gm_session = db.get_last_games_master_session_for_member_by_id(member.id)
-        today = datetime.datetime.today().date()
+        last_games_master_session_date = last_gm_session.date if last_gm_session is not None else member.last_games_master_session_date
+        days_since_games_master = (datetime.datetime.today().date() - last_games_master_session_date).days if last_games_master_session_date is not None else None
         return {
             "id" : member.id,
             "name" : member.name,
             "discord_name" : member.discord_name,
-            "games_master_count" : db.get_games_master_count_for_member_by_id(member.id),
+            "in_rotation" : member.in_rotation,
+            "games_master_count" : member.starting_games_master_session_count + db.get_games_master_count_for_member_by_id(member.id),
             "total_attendance" : db.get_total_attendance_for_member_by_id(member.id),
             "last_games_master_session_id" : last_gm_session.id if last_gm_session is not None else None,
-            "last_games_master_session_date" : last_gm_session.date if last_gm_session is not None else None,
-            "days_since_gm" : (today - last_gm_session.date).days if last_gm_session is not None else None,
+            "last_games_master_session_date" : last_games_master_session_date,
+            "days_since_games_master" : days_since_games_master,
         }
     
     with DataBaseSession() as db:
@@ -243,31 +244,38 @@ async def get_member_by_id(member_id: int):
         if member is None: return None
 
         # TODO: Compile list of all games that member has played
-        member_games = db.get_games_for_member(member.id)
-        session_members = db.get_session_members_for_member(member.id)
+        # member_games = db.get_games_for_member(member.id)
+        # session_members = db.get_session_members_for_member(member.id)
+
         last_gm_session = db.get_last_games_master_session_for_member_by_id(member.id)
+        last_games_master_session_date = last_gm_session.date if last_gm_session is not None else member.last_games_master_session_date
+        days_since_games_master = (datetime.datetime.today().date() - last_games_master_session_date).days if last_games_master_session_date is not None else None
+
+        sessions = list(set(session_member.session for session_member in member.session_members))
 
         return {
             "id" : member.id,
             "name" : member.name,
             "discord_name" : member.discord_name,
-            "games_master_count" : db.get_games_master_count_for_member_by_id(member.id),
+            "games_master_count" : member.starting_games_master_session_count + db.get_games_master_count_for_member_by_id(member.id),
             "last_games_master_session_id" : last_gm_session.id if last_gm_session is not None else None,
-            "last_games_master_session_date" : last_gm_session.date if last_gm_session is not None else None,
-            "days_since_gm" : (datetime.datetime.today().date() - last_gm_session.date).days if last_gm_session is not None else None,
+            "last_games_master_session_date" : last_games_master_session_date,
+            "days_since_games_master" : days_since_games_master,
             # "number_of_games" : len(member_games),
-            "number_of_sessions" : len(session_members),
+            "number_of_sessions" : len(member.session_members) + member.starting_games_master_session_count,
             # "games" : [{
             #     "id" : member_game.game.id,
             #     "name" : member_game.game.name,
             # } for member_game in member_games],
             "sessions" : [{
-                "id" : session_member.session.id,
-                "date" : session_member.session.date,
+                "id" : session.id,
+                "date" : session.date,
+                "session_members" : [{
                 "start" : session_member.start,
                 "end" : session_member.end,
                 "duration" : session_member.get_duration(),
-            } for session_member in session_members]
+                } for session_member in member.session_members if session_member.session_id == session.id]
+            } for session in sessions]
         }
 
 @authenticated.post("/members", status_code=201)
