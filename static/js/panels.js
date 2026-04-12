@@ -1,3 +1,4 @@
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 import { BasePanel } from "./base-panels.js";
 
 export class GamesMasterSuccessionPanel extends BasePanel
@@ -7,11 +8,16 @@ export class GamesMasterSuccessionPanel extends BasePanel
 
         let data = await api.get("/api/v1/games-master-succession")
         parent.append("p")
-            .style("font-size", "30px")
-            .text("NEXT GM IS "+data[0].member_name.toUpperCase());
+            .style("font-size", "60px")
+            .style("text-align", "center")
+            .text(data[0].member_name.toUpperCase());
         
-        let text = "Backups are ";
-        const numberOfBackups = 4;
+        parent.append("p")
+            .style("font-size", "20px")
+            .text("Backups:");
+
+        const numberOfBackups = 3;
+        let text = "";
         for (let i=0;i<numberOfBackups;i++) {
             text += data[i+1].member_name.toUpperCase()
             if (i < numberOfBackups - 2) text += ", ";
@@ -20,6 +26,7 @@ export class GamesMasterSuccessionPanel extends BasePanel
         }
         parent.append("p")
             .style("font-size", "20px")
+            .style("text-align", "center")
             .text(text);
     }
 }
@@ -30,13 +37,15 @@ export class SessionListPanel extends BasePanel
         super.create(parent, "SESSIONS");
         let data = await api.get("/api/v1/sessions");
 
+        data.sort((a, b) => d3.descending(a.date, b.date))
+
         let container = parent.append("div")
-            .attr("class", "link-container");
+            .attr("class", "sessions-link-container");
 
         let session = container.selectAll("div")
             .data(data)
             .join("div")
-            .attr("class", "link-item");
+            .attr("class", "sessions-link-item");
 
         session.append("a")
             .attr("href", d => "/sessions/"+d.id)
@@ -51,12 +60,12 @@ export class MemberListPanel extends BasePanel
         let data = await api.get("/api/v1/members");
 
         let container = root.append("div")
-            .attr("class", "link-container");
+            .attr("class", "members-link-container");
 
         let member = container.selectAll("div")
             .data(data)
             .join("div")
-            .attr("class", "link-item");
+            .attr("class", "members-link-item");
 
         member.append("a")
             .attr("href", d => "/members/"+d.id)
@@ -69,16 +78,16 @@ export class GameListPanel extends BasePanel
     async create(api, root) {
         super.create(root, "GAMES");
         let data = await api.get("/api/v1/games");
-
+        data.sort((a, b) => d3.ascending(a.name, b.name));
         let container = root.append("div")
-            .attr("class", "link-container");
+            .attr("class", "games-link-container");
 
-        let session = container.selectAll("div")
+        let game = container.selectAll("div")
             .data(data)
             .join("div")
-            .attr("class", "link-item");
+            .attr("class", "games-link-item");
 
-        session.append("a")
+        game.append("a")
             .attr("href", d => "/games/"+d.id)
             .text(d => d.name);
     }

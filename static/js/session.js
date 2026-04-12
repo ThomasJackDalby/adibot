@@ -9,7 +9,9 @@ let panels = [
 
 let api = new Api()
 
-let body = d3.select("body");
+let body = d3.select("body")
+    .attr("class", "panels-container");
+
 for(let i=0;i<panels.length;i++) {
     let panelContainer = body.append("div")
         .attr("class", "panel-container")
