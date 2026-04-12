@@ -344,15 +344,18 @@ async def get_games_master_succession():
     with DataBaseSession() as db:
         today = datetime.datetime.today().date()
         
-        def format(member):
+        def format(member: model.Member):
             last_gm_session = db.get_last_games_master_session_for_member_by_id(member.id)
-            days_since_gm = (today - last_gm_session.date).days if last_gm_session is not None else -1
+            last_games_master_session_date = last_gm_session.date if last_gm_session is not None else member.last_games_master_session_date
+            days_since_games_master = (today - last_games_master_session_date).days if last_games_master_session_date is not None else None
+        
             return { 
                 "member_id" : member.id,
                 "member_name" : member.name,
-                "days_since_gm" : days_since_gm
+                "last_games_master_session_date" : last_games_master_session_date,
+                "days_since_games_master" : days_since_games_master
             }
-        return list(sorted((format(member) for member in db.get_members() if member.in_rotation == True), key=lambda item: item["days_since_gm"], reverse=True))
+        return list(sorted((format(member) for member in db.get_members() if member.in_rotation), key=lambda item: item["days_since_games_master"], reverse=True))
 
 # -- export
 
