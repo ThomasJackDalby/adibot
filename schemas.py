@@ -1,4 +1,5 @@
 import pydantic
+import datetime
 
 class PostSessionRequest(pydantic.BaseModel):
     date: str
@@ -16,6 +17,7 @@ class PostMemberRequest(pydantic.BaseModel):
     name: str
     discord_name: str
     is_admin: bool | None = None
+    last_games_master_session_date: datetime.date | None
 
 class PostGamesRequest(pydantic.BaseModel):
     name: str

@@ -287,6 +287,8 @@ async def post_members(request: PostMemberRequest):
         member = db.get_member_by_discord_name(request.discord_name)
         if member is not None: raise fastapi.HTTPException(status_code=400, detail=f"Member with discord_name [{request.discord_name}] already exists.")  
         member = db.add_member(request.name, request.discord_name, request.is_admin if request.is_admin is not None else False)
+        member.last_games_master_session_date = request.last_games_master_session_date
+        db._session.commit()
         return member.id
 
 # -- games

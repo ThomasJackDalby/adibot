@@ -65,6 +65,20 @@ async def get_guild() -> discord.Guild | None:
 
 # --- Commands ---
 
+@tree.command(name='ascend', description='Take the crown. The peasants will follow.', guild=GUILD)
+@authorise()
+async def command_ascend(interaction: discord.Interaction, discord_member: discord.Member):
+    with DataBaseSession() as db:
+        member = db.get_member_by_discord_name(discord_member.name)
+        if member is None: await interaction.response.send_message(f"You cannot abdicate if you are not a member of adibob.")
+
+@tree.command(name='abdicate', description='Give up thy honour of GM. In time, we may forgive you.', guild=GUILD)
+@authorise()
+async def command_abdicate(interaction: discord.Interaction, discord_member: discord.Member):
+    with DataBaseSession() as db:
+        member = db.get_member_by_discord_name(discord_member.name)
+        if member is None: await interaction.response.send_message(f"You cannot abdicate if you are not a member of adibob.")
+
 # @tree.command(name='adi-stats', description='Get the stats of a member', guild=GUILD)
 # @authorise()
 # async def get_stats(discord_member: discord.Member):
@@ -100,8 +114,8 @@ async def on_ready():
         if member is None: db.add_member(ADMIN_NAME, ADMIN_DISCORD_NAME, is_admin=True)
 
     # TODO: Uncomment when slash commands re-added.
-    # synced = await tree.sync(guild=GUILD)
-    # if len(synced) == 0: raise Exception("Unable to synchronise slash commands.")
+    synced = await tree.sync(guild=GUILD)
+    if len(synced) == 0: raise Exception("Unable to synchronise slash commands.")
 
 @client.event
 async def on_message(message):
@@ -109,32 +123,36 @@ async def on_message(message):
 
 @client.event
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
-    if before.channel is None and after.channel is not None:
-        logger.debug(f"'{member.name}' joined the '{after.channel.name}' channel.")
-        await on_user_joins_channel(member)
-    elif before.channel is not None and after.channel is None:
-        logger.debug(f"'{member.name}' left the '{before.channel.name}' channel.")
-        await on_user_leaves_channel(member)
+    if before.channel is None and after.channel is None: return # voice status update might have been muting etc.
+    if before.channel == after.channel: return # same as above
+
+    if before.channel is not None:
+        if type(before.channel) != discord.VoiceChannel: logger.warning(f"Only discord voice channels are supported.")
+        else: await on_user_leaves_channel(member, before.channel)
+
+    if after.channel is not None:
+        if type(after.channel) != discord.VoiceChannel: logger.warning(f"Only discord voice channels are supported.")
+        else: await on_user_joins_channel(member, after.channel)
 
 @client.event
 async def on_presence_update(before: discord.Member, after: discord.Member):
-    if before.activity == after.activity:
-        logger.warning(f"Before activity is the same as the after activity [{before.activity}].")
-        return
-    if before.activity is not None:
-        await on_user_stops_activity(after, before.activity)
-    if after.activity is not None:
-        await on_user_starts_activity(after, after.activity)
+    if before.activity is None and after.activity is None: return
+    if before.activity == after.activity: return
+    if before.activity is not None: await on_user_stops_activity(after, before.activity)
+    if after.activity is not None: await on_user_starts_activity(after, after.activity)
 
 # -- Logic --
 
-async def on_user_joins_channel(discord_member: discord.Member) -> None:
-    await add_or_update_session_member(discord_member)
+async def on_user_joins_channel(discord_member: discord.Member, discord_channel: discord.VoiceChannel) -> None:
+    logger.debug(f"'{discord_member.name}' joined the '{discord_channel.name}' channel.")
+    await add_or_update_session_member(discord_channel, discord_member)
 
-async def on_user_leaves_channel(discord_member: discord.Member) -> None:
-    await add_or_update_session_member(discord_member, True)
+async def on_user_leaves_channel(discord_member: discord.Member, discord_channel: discord.VoiceChannel) -> None:
+    logger.debug(f"'{discord_member.name}' left the '{discord_channel.name}' channel.")
+    await add_or_update_session_member(discord_channel, discord_member, True)
 
 async def add_or_update_session_member(
+    discord_channel: discord.VoiceChannel,
     discord_member: discord.Member,
     is_end: bool = False):
 
@@ -149,10 +167,28 @@ async def add_or_update_session_member(
             logger.debug(f"[{discord_member.name}] is not a member of adibot.")
             return
 
-        session = db.get_or_create_session_with_date(current_datetime.date())
-        session_member = db.add_or_update_session_member(session.id, member.id, datetime=current_datetime, is_end=is_end)
+        session_date = utils.get_current_or_last_session_start_date(current_datetime)
+        session = db.get_or_create_session_with_date(session_date) # always use the session start date
 
-        # TODO: If we're ending the voice chat, end the session_member and any pending session_member_games
+        # if they are the first member of the session, congratulate them!
+        succession = db.get_games_master_succession()[:4]
+        if not any(db.get_session_members_for_session(session.id)):
+            await discord_channel.send(f"Welcome {member.name}! You're the first to arrive for tonights session :)")
+            succession_names = [m.name for m in succession]
+            games_master = succession_names[0]
+            backups = ", ".join(succession_names[1:-1])
+            backups += f" and {succession_names[-1]}"
+            await discord_channel.send(f"The GM tonight is {games_master}, with {backups} as backups.")
+
+        session_member = db.add_or_update_session_member(session.id, member.id, datetime=current_datetime, is_end=is_end)
+        if session_member is None: 
+            logger.warning("Failed to add session_member")
+            return
+
+        if is_end: # If we're ending the session_member, end the session_member and any pending session_member_games
+            pending_session_member_games = db.get_pending_session_member_games_for_session_member(session_member.id)
+            for pending_session_member_game in pending_session_member_games:
+                db.update_session_member_game(pending_session_member_game.id, current_datetime, True)
 
 async def on_user_starts_activity(discord_member: discord.Member, activity: ActivityTypes):
     logger.debug(f"{discord_member.name} has started activity [{activity.name}].")
@@ -165,10 +201,8 @@ async def on_user_stops_activity(discord_member: discord.Member, activity: Activ
 async def add_or_update_session_member_game(
         discord_member: discord.Member,
         discord_activity: ActivityTypes,
-        is_end: bool = False):
-    
-    with DataBaseSession() as db:
-        
+        is_end: bool = False):  
+    with DataBaseSession() as db:    
         current_datetime = datetime.datetime.today()
         if not utils.is_valid_session_from_datetime(current_datetime): 
             logger.debug(f"The current date [{current_datetime}] is not a valid session.")

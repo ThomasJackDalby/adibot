@@ -2,7 +2,7 @@ import requests
 import json
 import datetime
 
-API_URL = "http://192.168.0.100:8000/api/v1"
+API_URL = "http://localhost:8000/api/v1"
 API_TOKEN = "hjf53jhg45fj31lkj4h"
 
 # data = {'input': open('export.members.csv','rb')}
@@ -22,16 +22,23 @@ API_TOKEN = "hjf53jhg45fj31lkj4h"
 
 #         })
 
+import random
+import time
+
+
 def upload_members(file_path):
     with open(file_path, "r") as file:
         lines = [line.strip() for line in file.readlines()][1:]
         for line in lines:
             discord_name, name = line.split(",")
+            last_games_master_session_date = (datetime.datetime(2026, 4, 12, 0, 0, 0) - datetime.timedelta(days=random.randint(0, 100))).date()
+
             response = requests.post(
                 f"{API_URL}/members", 
                 json={ 
                     "name": name,
-                    "discord_name": discord_name
+                    "discord_name": discord_name,
+                    "last_games_master_session_date": last_games_master_session_date.strftime("%Y-%m-%d")
                 },
                 headers={ "token": API_TOKEN })
             print(f"Uploaded {name} [{discord_name}] : {response.json()}")

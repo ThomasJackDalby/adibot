@@ -202,9 +202,8 @@ class DataBaseSession:
             member_id: int, 
             datetime: datetime.datetime,
             is_end: bool) -> SessionMember | None:
-        
+  
         session_member = self.get_pending_session_member_for_session_and_member(session_id, member_id)
-
         if not is_end: 
             if session_member is not None:
                 logger.warning("Cannot start a session_member as one is already pending.")
@@ -220,7 +219,11 @@ class DataBaseSession:
 
 # -- SessionMemberGame --
 
-    def get_session_member_game_by_session_member_and_game(self, session_member_id: int, game_id: int) -> Optional[SessionMemberGame]:
+    def get_session_member_game_by_id(self, session_member_game_id: int) -> SessionMemberGame | None:
+        return self._session.scalars(select(SessionMemberGame)
+            .where(SessionMemberGame.id == session_member_game_id)).first()
+    
+    def get_session_member_game_by_session_member_and_game(self, session_member_id: int, game_id: int) -> SessionMemberGame | None:
         return self._session.scalars(select(SessionMemberGame)
             .where(SessionMemberGame.game_id == game_id)
             .where(SessionMemberGame.session_member_id == session_member_id)).first()
@@ -241,6 +244,14 @@ class DataBaseSession:
             .where(SessionMemberGame.end == None)
             .order_by(SessionMemberGame.start)
             ).first()
+    
+    def get_pending_session_member_games_for_session_member(self, session_member_id: int) -> list[SessionMemberGame]:
+        return list(self._session.scalars(select(SessionMemberGame)
+            .where(SessionMemberGame.session_member_id == session_member_id)
+            .where(SessionMemberGame.start != None)
+            .where(SessionMemberGame.end == None)
+            .order_by(SessionMemberGame.start)
+            ).all())
     
     def add_session_member_game(
             self,
@@ -284,6 +295,16 @@ class DataBaseSession:
         session_member_game.end = datetime
         self._session.commit()
         return session_member_game
+    
+    def update_session_member_game(self, session_member_game_id: int, datetime: datetime.datetime, is_end: bool):
+        session_member_game = self.get_session_member_game_by_id(session_member_game_id)
+        if session_member_game is None:
+            logger.warning(f"Cannot update session_member_game as one does not exist with id [{id}].")
+            return
+
+        if not is_end: session_member_game.start = datetime
+        else: session_member_game.end = datetime
+        self._session.commit()
 
 ## -- stats
 
@@ -296,6 +317,17 @@ class DataBaseSession:
     
     def get_last_games_master_session_for_member_by_id(self, member_id):
         return self._session.scalars(select(Session).where(Session.games_master_id == member_id)).first()
+    
+    def get_games_master_succession(self) -> list[Member]:
+        today = datetime.datetime.today().date()
+        
+        def calculate_days_since_games_master(member: Member) -> int | None:
+            last_games_master_session = self.get_last_games_master_session_for_member_by_id(member.id)
+            last_games_master_session_date = last_games_master_session.date if last_games_master_session is not None else member.last_games_master_session_date
+            return (today - last_games_master_session_date).days if last_games_master_session_date is not None else None
+
+        members_in_rotation = [(member, calculate_days_since_games_master(member)) for member in self.get_members() if member.in_rotation]
+        return [member for member, _ in sorted(members_in_rotation, key=lambda m: m[1] if m[1] is not None else -1, reverse=True)]
 
 ## -- RAW --
 

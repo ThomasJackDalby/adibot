@@ -18,3 +18,5 @@ def is_valid_session(weekday: int, hour: int) -> bool:
     elif weekday == SESSION_END_WEEKDAY:
         return hour <= SESSION_END_HOUR
     return False
+
+
