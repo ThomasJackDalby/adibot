@@ -167,22 +167,25 @@ async def post_session_members(session_id: int, request: PostSessionMemberReques
     
 # -- session-member-games
 
-@authenticated.post("/sessions/{session_id}/members/{member_id}/", status_code=201)
-async def post_session_member_games(session_id: int, request: PostSessionMemberRequest):
+@authenticated.post("/sessions/{session_id}/members/{session_member_id}/", status_code=201)
+async def post_session_member_games(session_id: int, session_member_id: int, request: PostSessionMemberRequest):
     with DataBaseSession() as db:
         session = db.get_session_with_id(session_id)
         if session is None: raise fastapi.HTTPException(status_code=403, detail=f"No session with id [{session_id}] exists.")  
 
-        member = db.get_member_with_id(request.member_id)
-        if member is None: raise fastapi.HTTPException(status_code=400, detail=f"No member with id [{request.member_id}] exists.")
+        session_member = db.get_session_member_by_id(session_member_id)
+        if session_member is None: raise fastapi.HTTPException(status_code=400, detail=f"No member with id [{session_member_id}] exists.")
          
+        game = db.get_game_by_id(request.game_id)
+        if game is None: raise fastapi.HTTPException(status_code=400, detail=f"No game with id [{request.game_id}] exists.")
+
         start = datetime.datetime.strptime(request.start, "%d/%m/%Y %H:%M:%S")
         end = datetime.datetime.strptime(request.end, "%d/%m/%Y %H:%M:%S")
-        # check before/after?
+        # TODO: check before/after?
 
-        session_member = db.add_session_member(session.id, member.id, start, end)
-        if session_member is None: raise fastapi.HTTPException(status_code=500, detail=f"Unable to add session_member to the database.")    
-        return session_member.id
+        session_member_game = db.add_session_member_game(session_member.id, game_id, start, end)
+        if session_member_game is None: raise fastapi.HTTPException(status_code=500, detail=f"Unable to add session_member to the database.")    
+        return session_member_game.id
 
 
 # -- session-games
