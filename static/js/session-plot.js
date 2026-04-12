@@ -1,6 +1,5 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-import BasePanel from "./base-panel.js"
-import BasePlot, { formatText } from "./base-plot.js";
+import { BasePlot, formatText } from "./base-panels.js";
 
 const marginTop = 50;
 const memberHeight = 80;
@@ -64,8 +63,6 @@ export class SessionPlot extends BasePlot {
                 return member;
             });
 
-        console.log(data);
-        
         // get session start/end datetime
         let sessionStart = d3.map(session.sessionMembers, sessionMember => new Date(sessionMember.start))
             .reduce((a, b) => a.getTime() < b.getTime() ? a : b);
@@ -84,7 +81,7 @@ export class SessionPlot extends BasePlot {
         if (sessionEnd.getTime() < earliestSessionEnd.getTime()) sessionEnd = earliestSessionEnd;   
         const scaleTime = d3.scaleTime([sessionStart, sessionEnd], [100, this.plotWidth-100]);
 
-        this.root.append("g")
+        this.svg.append("g")
             .attr("transform", "translate(0,"+marginTop+")")
             .attr("class", "axis")
             .call(d3.axisTop(scaleTime));
@@ -93,7 +90,7 @@ export class SessionPlot extends BasePlot {
         let gridTime = new Date(sessionStart);
         while(gridTime.getTime() < sessionEnd.getTime())
         {
-            this.root.append("line")
+            this.svg.append("line")
                 .attr("x1", scaleTime(gridTime))
                 .attr("x2", scaleTime(gridTime))
                 .attr("y1", marginTop)
@@ -104,7 +101,7 @@ export class SessionPlot extends BasePlot {
             for(let i=0;i<3;i++){
                 gridTime.setMinutes(gridTime.getMinutes()+15);
                 if (gridTime.getTime() > sessionEnd.getTime()) break;
-                this.root.append("line")
+                this.svg.append("line")
                     .attr("x1", scaleTime(gridTime))
                     .attr("x2", scaleTime(gridTime))
                     .attr("y1", marginTop)
@@ -121,7 +118,7 @@ export class SessionPlot extends BasePlot {
         let isSessionLive = now.getTime() > sessionStart.getTime() && now.getTime() < sessionEnd.getTime();
         if (isSessionLive)
         {
-            this.root.append("line")
+            this.svg.append("line")
                 .attr("x1", scaleTime(now))
                 .attr("x2", scaleTime(now))
                 .attr("y1", marginTop)
@@ -132,7 +129,7 @@ export class SessionPlot extends BasePlot {
 
         // create a line for each member
         // members is actually session_members
-        let member = this.root.selectAll("g.member")
+        let member = this.svg.selectAll("g.member")
             .data(data)
             .join("g")
             .attr("class", "member");
@@ -210,21 +207,10 @@ export class SessionSummaryPanel extends BasePlot
                 game.yMid = game.yTop + gameHeight / 2.0;
                 game.yBottom = game.yTop + gameHeight;
                 game.gameFill = getColor(i, session.games.length)
-                // member.sessions = session.sessionMembers
-                //     .filter(d => d.memberId == member.id)
-                //     .map(function(sessionMember, j) {
-                //     sessionMember.yMid = member.yMid;
-
-                //     sessionMember.sessionMemberGames.forEach(d => d.yMid = member.yMid) 
-
-                //     return sessionMember;
-                // });
                 return game;
             });
-        data = d3.sort(data, game => game.name);
-        console.log(data);
 
-        let game = this.plot
+        let game = this.svg
             .append("g")
             .selectAll("g")
             .data(data)

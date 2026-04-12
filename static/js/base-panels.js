@@ -1,5 +1,10 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-import BasePanel from "./base-panel.js"
+export class BasePanel {
+    create(root, title) {
+        root.append("hr");
+        root.append("h2")
+            .text(title);
+    }
+}
 
 export function formatText(selection) {
     selection
@@ -8,8 +13,9 @@ export function formatText(selection) {
         .attr('font-size', '15')
 }
 
-export default class BasePlot extends BasePanel {
+export class BasePlot extends BasePanel {
     create(parent, title, plotWidth = 1000, plotHeight = 500) {
+        super.create(parent, title);
         this.plotWidth = plotWidth;
         this.plotHeight = plotHeight;
 
@@ -17,20 +23,6 @@ export default class BasePlot extends BasePanel {
             .attr("width", "100%")
             .attr("height", "100%")
             .attr("viewBox", "0 0 "+this.plotWidth+" "+this.plotHeight);
-
-        this.root = this.svg            
-            .append("g");
-
-        this.root
-            .append("text")
-            .attr('font-size', '15')
-            .attr("x", 10)
-            .attr("y", 20)
-            .text(title)
-
-        this.plot = this.root
-            .append("g")
-            .attr("transform", "translate(0, 30)");
     }
 
     getPlotWidth() {

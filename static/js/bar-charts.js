@@ -1,5 +1,5 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-import BasePlot, { formatText } from "./base-plot.js";
+import { BasePlot, formatText } from "./base-panels.js";
 
 class BarChart extends BasePlot {
     create(parent, title) {
@@ -19,7 +19,7 @@ class BarChart extends BasePlot {
             .domain([0, maxCount])
             .range([0, this.maxRectHeight]);
         
-        let selection = this.plot
+        let selection = this.svg
             .selectAll('g')
             .data(data)
             .join('g')

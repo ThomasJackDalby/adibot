@@ -413,7 +413,7 @@ async def get_page_session(request: fastapi.Request, id: int):
         request=request, name="session.html", context={"session": session}
     )
 
-app.mount("/", fastapi.staticfiles.StaticFiles(directory=os.environ["STATIC_PATH"], html = True), name="static")
+app.mount("/", fastapi.staticfiles.StaticFiles(directory="static", html = True), name="static")
 
 async def main():
     config = uvicorn.Config(app=app, host="0.0.0.0", port=8000, log_config=None)
