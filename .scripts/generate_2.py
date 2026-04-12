@@ -42,7 +42,7 @@ MEMBERS = [
 ]
 
 API_URL = "http://localhost:8000/api/v1"
-API_TOKEN = "hjf53jhg45fj31lkj4h"
+API_TOKEN = "k235bk1jb35lj3524535kjb"
 
 api_session = requests.Session()
 api_session.headers = { "token": API_TOKEN }
@@ -112,33 +112,36 @@ def generate_session(session_date: datetime.date, member_ids: list[int], game_id
             "start" : session_member_start.strftime("%d/%m/%Y %H:%M:%S"),
             "end" : session_member_end.strftime("%d/%m/%Y %H:%M:%S"),
         })
-        session_members.append((member_id, [session_member_id, session_member_start, session_member_end]))
+        session_members.append((member_id, [(session_member_id, session_member_start, session_member_end)]))
 
-    # min_game_session_start = session_start
-    # for max_game_session_length in game_sessions:
-    #     max_game_session_end = min_game_session_start + datetime.timedelta(seconds=max_game_session_length*60)
+    # add games to the session
+    available_game_ids = list(game_ids) 
+    min_game_session_start = session_start
+    for max_game_session_length in game_sessions:
+        max_game_session_end = min_game_session_start + datetime.timedelta(seconds=max_game_session_length*60)
+        game_id = random.choice(available_game_ids)
+        available_game_ids.remove(game_id)
+        
+        print(f"{game_id=}")
+        print(f"{min_game_session_start=}")
+        print(f"{max_game_session_end=}")
 
-    #     print(f"{min_game_session_start=}")
-    #     print(f"{max_game_session_end=}")
+        # for members which are online, they start playing this game with a random delay
+        for member_id, member_sessions in session_members:
+            for session_member_id, session_member_start, session_member_end in member_sessions:
+                if (session_member_start < max_game_session_end and 
+                    session_member_end > min_game_session_start):
+                    member_game_session_start = max(min_game_session_start, session_member_start)
+                    member_game_session_end = min(max_game_session_end, session_member_end)
+                    print(f"{member_game_session_start=}")
+                    print(f"{member_game_session_end=}")
 
-    #     # for members which are online, they start playing this game with a random delay
-    #     for member_id, session_member_start, session_member_end in session_members:
-    #         if (session_member_start < max_game_session_end and 
-    #             session_member_end > min_game_session_start):
-
-    #             member_game_session_start = max(min_game_session_start, session_member_start)
-    #             member_game_session_end = min(max_game_session_end, session_member_end)
-    #             print(f"{member_game_session_start=}")
-    #             print(f"{member_game_session_end=}")
-
-    #     min_game_session_start = max_game_session_end
-
-    # session_games = [{ 
-    #     "game_id" : random.choice(games)["id"],
-    #     "start" : None,
-    #     "end" : None,
-    #     } for _ in range(0, number_of_session_games)]
-
+                    post(f"sessions/{session_id}/members/{session_member_id}",{
+                        "game_id" : game_id,
+                        "start" : member_game_session_start,
+                        "end" : member_game_session_end,
+                    })
+        min_game_session_start = max_game_session_end
 
 def distribute(value, number_of_chunks, max_chunk_size=1):
     result = [1] * number_of_chunks
@@ -149,7 +152,6 @@ def distribute(value, number_of_chunks, max_chunk_size=1):
         result[i] += amount
         value -= amount
     return result
-
 
 if __name__ == "__main__":
 
